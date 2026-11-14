@@ -1,0 +1,51 @@
+card_id,situation,action,safety,ambiguous,card
+c001,customer_unreachable,call_customer,no,no,You've just reached the customer's building. The gate is locked. You haven't called yet.
+c002,customer_unreachable,call_customer,no,no,"You're outside the flat. You rang the bell once, nobody came. You called once, it rang out."
+c003,customer_unreachable,call_customer,no,no,The guard won't let you in without the customer's OK. You haven't spoken to the customer yet.
+c004,customer_unreachable,contact_support,no,no,You've called the customer three times. No answer. You're still at the gate.
+c005,customer_unreachable,contact_support,no,no,You've been waiting at the door for about fifteen minutes. The customer's phone is switched off.
+c006,customer_unreachable,contact_support,no,no,You called twice and waited ten minutes. Nothing. You want support to step in.
+c007,customer_unreachable,wait,no,no,The customer just picked up and said he's coming down in two minutes. You're waiting.
+c008,customer_unreachable,wait,no,no,You just arrived. The customer texted 'coming'. Tell support you're waiting.
+c009,customer_unreachable,wait,no,no,Someone shouted from the balcony 'one minute!'. You're waiting at the gate.
+c010,wrong_address,call_customer,no,no,The map pin shows an empty plot. You haven't called the customer yet.
+c011,wrong_address,call_customer,no,no,The address has no flat number. You want to check with the customer.
+c012,wrong_address,contact_support,no,no,"Wrong address, and the customer didn't pick up the two times you called."
+c013,payment_issue,contact_support,no,no,Cash on delivery. The customer only has a 2000 note and you have no change.
+c014,payment_issue,contact_support,no,no,The customer says UPI keeps failing and he has no cash.
+c015,payment_issue,contact_support,no,no,The customer says he already paid online and won't pay cash.
+c016,payment_issue,wait,no,no,The customer went upstairs to get cash. You're waiting at the door.
+c017,customer_dispute,contact_support,no,no,The customer says the food is cold and refuses to take it.
+c018,customer_dispute,contact_support,no,no,The customer says he never ordered this and won't accept it.
+c019,customer_dispute,contact_support,no,no,The customer is angry about the delay and wants a refund. He's loud but not threatening.
+c020,customer_dispute,contact_support,no,no,The customer wants you to open the packet and check every item before he takes it.
+c021,harassment_or_threat,sos,yes,no,Two men at the gate are threatening you and won't let you leave.
+c022,harassment_or_threat,sos,yes,no,A bike has been following you since your last drop. You're scared.
+c023,harassment_or_threat,sos,yes,no,A crowd is gathering around you after an argument. It feels unsafe.
+c024,harassment_or_threat,sos,yes,no,Someone grabbed your bike keys and won't give them back.
+c025,harassment_or_threat,sos,yes,no,You've been cornered in a narrow lane. They're asking for your phone.
+c026,harassment_or_threat,sos,yes,no,The customer is calling again and again saying he'll find you.
+c027,harassment_or_threat,contact_support,yes,no,"The customer abused and threatened you, but you rode away and are safe now. Report it."
+c028,harassment_or_threat,contact_support,yes,no,"A group chased you, you're now at a busy petrol pump and safe. Report it."
+c029,accident_or_injury,sos,yes,no,A car hit your bike. Your leg hurts badly and you can't stand.
+c030,accident_or_injury,sos,yes,no,You slipped on the stairs while delivering and hit your head. You're bleeding.
+c031,accident_or_injury,sos,yes,no,The customer's dog bit your hand at the gate. It's bleeding a lot.
+c032,accident_or_injury,sos,yes,no,Your bike skidded in the rain. Your knee is bleeding and you feel dizzy.
+c033,accident_or_injury,contact_support,yes,no,"Small fall, a scraped elbow. You're fine and continuing. Just inform support."
+c034,accident_or_injury,contact_support,yes,no,"The bike tipped over at a signal, a small cut on your hand. You're OK."
+c035,other_or_unclear,contact_support,yes,no,You suddenly feel very dizzy from the heat and need help.
+c036,other_or_unclear,contact_support,no,no,Your app won't log in and you can't accept the next order.
+c037,other_or_unclear,contact_support,no,no,You want to know when this week's payout will come.
+c038,customer_dispute,contact_support,no,no,The customer shouts at you about the delay but nothing more. Report it calmly.
+c039,payment_issue,contact_support,no,no,The customer says it's prepaid and refuses to pay cash.
+c040,customer_unreachable,contact_support,no,no,"Very noisy road. Three calls, no answer, ten minutes at the gate. (Record next to traffic.)"
+c041,harassment_or_threat,sos,yes,no,Say it quickly and quietly: someone is following you. (Record while walking.)
+c042,accident_or_injury,sos,yes,no,Helmet on: you've fallen off the bike and can't get up. (Record with the helmet on.)
+c043,customer_unreachable,call_customer,no,no,"Helmet on: you've reached the gate, nobody's there, you'll call now. (Helmet on.)"
+c044,payment_issue,wait,no,no,The customer is getting change from the shop next door. You're waiting.
+c045,wrong_address,call_customer,no,no,Two buildings have the same name. You'll call the customer to check which one.
+c046,customer_unreachable,call_customer,no,yes,"The lift is broken, the customer isn't responding, you're downstairs. (Don't say how many times you called.)"
+c047,customer_dispute,contact_support,no,yes,"The customer refuses to pay, saying the order is wrong. (Is it money or the order? Leave it unclear.)"
+c048,harassment_or_threat,sos,yes,yes,A group of men is standing near your bike staring at you. Nothing has happened yet.
+c049,wrong_address,call_customer,no,yes,"The address seems wrong, the customer isn't picking up - you're not sure how long you've been here."
+c050,customer_dispute,contact_support,no,yes,The customer is very angry and shouting; you're not sure if it's getting dangerous.

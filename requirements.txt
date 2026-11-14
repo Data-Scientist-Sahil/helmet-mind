@@ -1,0 +1,18 @@
+# backbone, training, evaluation (Kaggle T4: keep the preinstalled CUDA torch)
+torch>=2.2
+transformers==5.17.0        # Gemma 4 support; pinned by nirnaya-inference
+accelerate
+safetensors
+huggingface_hub
+librosa
+soundfile
+scipy
+numpy
+# nirnaya-inference is not on PyPI: clone it and add it to PYTHONPATH
+#   git clone https://github.com/NeverInAsh/nirnaya-inference
+#   git -C nirnaya-inference checkout 0fcd64f22b3013dd2bb1e268533bcc91accf87c6
+# Gemma 4's processor imports torchvision (image path) even for audio-only use
+torchvision
+
+# TTS only - install in a SEPARATE environment (it pins transformers==4.46.1):
+#   pip install git+https://github.com/huggingface/parler-tts.git soundfile

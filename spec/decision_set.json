@@ -1,0 +1,268 @@
+{
+ "version": "0.3.0",
+ "state": "A delivery rider in India sent this voice note during an order.",
+ "questions": {
+  "situation": {
+   "type": "choice",
+   "instructions": "What situation is the rider in?",
+   "criteria": {
+    "customer_unreachable": "At the drop point, the customer is not answering, not at the door, or the gate is locked",
+    "wrong_address": "The address or location is wrong or incomplete, or the rider cannot find the place",
+    "restaurant_delay": "At pickup, the order is not ready and the rider is kept waiting",
+    "order_issue_at_pickup": "At pickup, items are wrong, missing or unavailable, or the restaurant cancels",
+    "food_spilled_or_damaged": "The food has spilled or the package is damaged",
+    "vehicle_breakdown": "The rider's vehicle has broken down (puncture, battery, fuel) and the rider is not hurt",
+    "road_blocked_or_weather": "Traffic, a closed road, waterlogging or heavy rain is stopping the rider",
+    "payment_issue": "A money problem at delivery: no cash or change, UPI failing, or the customer says it is already paid",
+    "customer_dispute": "The customer refuses or argues about the order itself (does not want it, wants extras, complains about delay or food), without threatening anyone",
+    "accident_or_injury": "The rider has had an accident or someone is injured",
+    "harassment_or_threat": "Someone is abusing, threatening or following the rider, or the place feels unsafe",
+    "other_or_unclear": "Something else, or the message is too unclear to tell"
+   }
+  },
+  "action": {
+   "type": "choice",
+   "instructions": "What should the rider do next?",
+   "criteria": {
+    "wait": "Wait a few more minutes where they are",
+    "call_customer": "Call the customer",
+    "contact_support": "Contact rider support",
+    "request_reassign": "Ask for the order to be reassigned to another rider",
+    "return_to_restaurant": "Go back to the restaurant",
+    "sos": "Trigger SOS and get urgent human help"
+   }
+  },
+  "safety": {
+   "type": "noul",
+   "instructions": "Is the rider or someone with them in danger, or does a person need urgent help right now?"
+  },
+  "language": {
+   "type": "choice",
+   "instructions": "Which language is the rider speaking?",
+   "criteria": {
+    "hinglish": "Hinglish (Hindi mixed with English)",
+    "hindi": "Hindi",
+    "english": "English"
+   }
+  }
+ },
+ "action_rules": {
+  "customer_unreachable": {
+   "default": "call_customer",
+   "overrides": [
+    {
+     "if": {
+      "attempts_gte": 2
+     },
+     "then": "contact_support"
+    },
+    {
+     "if": {
+      "waited_min_gte": 10
+     },
+     "then": "contact_support"
+    },
+    {
+     "if": {
+      "rider_waiting": true,
+      "waited_min_lt": 5
+     },
+     "then": "wait"
+    }
+   ],
+   "when": "call_customer while the rider has called at most once and waited under 10 min; contact_support after 2+ calls or 10+ min; wait when the customer has answered and said they are coming (under 5 min so far)."
+  },
+  "wrong_address": {
+   "default": "call_customer",
+   "overrides": [
+    {
+     "if": {
+      "attempts_gte": 2
+     },
+     "then": "contact_support"
+    }
+   ],
+   "when": "call_customer to confirm the address; contact_support once 2+ calls get no answer."
+  },
+  "restaurant_delay": {
+   "default": "wait",
+   "overrides": [
+    {
+     "if": {
+      "waited_min_gte": 20
+     },
+     "then": "request_reassign"
+    },
+    {
+     "if": {
+      "not_started": true
+     },
+     "then": "request_reassign"
+    }
+   ],
+   "when": "wait while the delay is under 20 min; request_reassign at 20+ min or when cooking has not started."
+  },
+  "order_issue_at_pickup": {
+   "default": "contact_support",
+   "overrides": [
+    {
+     "if": {
+      "still_at_restaurant": true,
+      "fixable": true
+     },
+     "then": "wait"
+    },
+    {
+     "if": {
+      "left_restaurant": true,
+      "near_restaurant": true
+     },
+     "then": "return_to_restaurant"
+    }
+   ],
+   "when": "wait if still at the restaurant and it can be fixed; return_to_restaurant if already left but nearby; otherwise contact_support."
+  },
+  "food_spilled_or_damaged": {
+   "default": "contact_support",
+   "overrides": [
+    {
+     "if": {
+      "near_restaurant": true
+     },
+     "then": "return_to_restaurant"
+    }
+   ],
+   "when": "return_to_restaurant when still near it; otherwise contact_support."
+  },
+  "vehicle_breakdown": {
+   "default": "request_reassign",
+   "overrides": [
+    {
+     "if": {
+      "fix_minutes_lte": 10
+     },
+     "then": "contact_support"
+    }
+   ],
+   "when": "request_reassign; contact_support (keep the order) when the fix takes 10 min or less."
+  },
+  "road_blocked_or_weather": {
+   "default": "wait",
+   "overrides": [
+    {
+     "if": {
+      "cannot_proceed": true
+     },
+     "then": "contact_support"
+    }
+   ],
+   "when": "wait; contact_support when the rider cannot proceed at all."
+  },
+  "payment_issue": {
+   "default": "contact_support",
+   "overrides": [
+    {
+     "if": {
+      "customer_fetching_money": true
+     },
+     "then": "wait"
+    }
+   ],
+   "when": "contact_support; wait while the customer is fetching money."
+  },
+  "customer_dispute": {
+   "default": "contact_support",
+   "overrides": [],
+   "when": "contact_support - never argue, never return the order without support."
+  },
+  "accident_or_injury": {
+   "default": "sos",
+   "overrides": [
+    {
+     "if": {
+      "minor": true,
+      "rider_ok": true
+     },
+     "then": "contact_support"
+    }
+   ],
+   "when": "sos; contact_support only for a minor fall where the rider says they are fine (safety stays yes)."
+  },
+  "harassment_or_threat": {
+   "default": "sos",
+   "overrides": [
+    {
+     "if": {
+      "rider_left_safe": true
+     },
+     "then": "contact_support"
+    }
+   ],
+   "when": "sos - including implicit threats (being followed, cornered, a crowd gathering, keys or phone grabbed); contact_support only once the rider has left and is safe (safety stays yes)."
+  },
+  "other_or_unclear": {
+   "default": "contact_support",
+   "overrides": [],
+   "when": "contact_support."
+  }
+ },
+ "safety_rules": {
+  "always_yes_situations": [
+   "accident_or_injury",
+   "harassment_or_threat"
+  ],
+  "yes_if_cue": [
+   "medical_emergency",
+   "dangerous_place"
+  ]
+ },
+ "language_rule": {
+  "loanwords_counted_as_hindi": [
+   "order",
+   "phone",
+   "call",
+   "address",
+   "location",
+   "gate",
+   "customer",
+   "restaurant",
+   "bike",
+   "otp",
+   "app",
+   "support",
+   "delivery",
+   "packet",
+   "cancel",
+   "payment",
+   "upi",
+   "cash",
+   "minute",
+   "building",
+   "flat",
+   "society",
+   "lift",
+   "signal"
+  ],
+  "hinglish_min_other_english_words": 2
+ },
+ "scopes": {
+  "m1": {
+   "description": "door-step wedge: what can happen at or on the way to the customer's door",
+   "situations": [
+    "customer_unreachable",
+    "wrong_address",
+    "payment_issue",
+    "customer_dispute",
+    "accident_or_injury",
+    "harassment_or_threat",
+    "other_or_unclear"
+   ]
+  }
+ },
+ "situation_boundaries": [
+  "payment_issue vs customer_dispute: payment is about the money (cash, change, UPI, 'already paid'); dispute is about the order itself (refuses it, wants extras, angry about delay or food). 'Refuses to pay because it is prepaid' is payment.",
+  "customer_dispute vs harassment_or_threat: shouting or complaining is dispute; any threat of harm, blocking the rider's way, grabbing belongings or a crowd closing in is harassment.",
+  "accident_or_injury vs vehicle_breakdown: if the rider or anyone is hurt it is accident_or_injury; a fallen bike with nobody hurt is vehicle_breakdown.",
+  "someone else's accident blocking the road is road_blocked_or_weather, safety no."
+ ]
+}

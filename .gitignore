@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
+.ipynb_checkpoints/
+# large / regenerable artefacts
+hf_cache/
+*.safetensors
+features/
+data/audio/**/*.wav
+data/audio/**/*.flac
+data/noise/raw/
+runs/**/*.pt
+# real recordings stay private unless consented for release
+data/real/audio/
+# internal notes never belong in this repo
+planning/
+data/noise/
+results/
+*.zip
