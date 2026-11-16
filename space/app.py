@@ -539,7 +539,8 @@ def _load_engine():
             str(run),
             device="cuda" if cuda else "cpu",
             precision=precision,
-            placement="single" if cuda else "auto",
+            # one big GPU (>=20 GB) holds the ~16 GB fp16 model; otherwise split over every visible GPU (Kaggle 2x T4)
+            placement="single" if cuda and torch.cuda.get_device_properties(0).total_memory >= 20 * 2**30 else "auto",
             thresholds=merged,
         )
         return ENGINE
