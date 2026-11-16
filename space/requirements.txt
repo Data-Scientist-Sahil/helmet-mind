@@ -1,0 +1,13 @@
+# Space runtime. Gradio itself comes from sdk_version in README.md.
+# ZeroGPU images already provide torch and the `spaces` package.
+torch
+transformers==5.17.0
+accelerate
+safetensors
+huggingface_hub
+librosa
+soundfile
+scipy
+numpy
+torchvision
+matplotlib

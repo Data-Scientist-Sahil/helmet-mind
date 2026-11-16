@@ -20,3 +20,15 @@ planning/
 data/noise/
 results/
 *.zip
+
+# Space: never commit weights, extracted runs, local venvs, or screenshots
+space/run/
+space/**/*.pt
+space/**/*.safetensors
+space/**/*.bin
+space/.venv/
+space/venv/
+space/shots/
+space/.gradio/
+space/feedback/
+space/nirnaya-inference/

@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.gradio/
+feedback/
+.env
+.DS_Store
+# trained weights and extracted run dirs — never commit these
+run/
+*.pt
+*.safetensors
+*.bin
+# local verification artefacts
+shots/
+# leftover zips
+*.zip

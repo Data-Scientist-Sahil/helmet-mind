@@ -1,0 +1,8 @@
+{
+ "safety_tau": 0.02,
+ "low_conf": 0.6,
+ "sos_tau": 0.42,
+ "checkin_tau": 0.04,
+ "checkin_timeout_s": 30,
+ "source": "round-3 two-level operating point (sos_tau 0.42, checkin_tau 0.04, safety_tau 0.02). Fit on round-3 out-of-fold clips; ship this file with the m1v3 head."
+}

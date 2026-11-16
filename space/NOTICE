@@ -1,0 +1,21 @@
+rider-voice-decisions
+Copyright 2026 Sahil Chavan
+
+This project builds on:
+
+- nirnaya-flash-1.0 (https://huggingface.co/Darkrider/nirnaya-flash-1.0) and nirnaya-inference
+  (https://github.com/NeverInAsh/nirnaya-inference), Copyright 2026 Anshik Bansal, Apache License 2.0.
+  "Nirnaya" is a name of Anshik Bansal. This licence does not grant permission to use it, except as needed
+  to describe where this work came from.
+- nirnaya-flash-1.0 is a modified version of Gemma 4 E4B by Google, licensed under the Apache License 2.0.
+- The request format and evaluation style follow the Decision Index kit
+  (https://github.com/apolinario/decision-index), Copyright 2026 Apolinário Passos, MIT License.
+  No Decision Index suite data is used for training or included here.
+- Synthetic speech is generated with Indic Parler-TTS by AI4Bharat
+  (https://huggingface.co/ai4bharat/indic-parler-tts), Apache License 2.0.
+- Real background noise (optional) comes from MS-SNSD (https://github.com/microsoft/MS-SNSD, code MIT): Freesound
+  clips under CC0 and DEMAND clips (https://zenodo.org/record/1227121) under CC BY-SA 3.0. Noisy clips made with
+  them, if published, are shared under CC BY-SA 3.0. No noise audio is included in this repository.
+
+This is a concept for Indian last-mile delivery built on synthetic data. It is not affiliated with,
+endorsed by, or built for any delivery platform.

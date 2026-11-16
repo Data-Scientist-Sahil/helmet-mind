@@ -14,6 +14,23 @@ A short voice note goes in — *"customer ka gate band hai, phone nahi utha raha
 
 A concept for Indian last-mile delivery, built on synthetic data. **Not affiliated with any delivery platform.**
 
+## Live demo
+
+A Gradio dispatch console lives in [`space/`](space/). Record or upload a short rider voice note — or click a preset — and the model returns the situation, next action, language, and a two-level safety alert (SOS, or an “Are you safe?” check-in).
+
+**Try it live:** _[Hugging Face Space — link to be added]_
+
+To run the console locally without trained weights:
+
+```bash
+cd space
+pip install -r requirements.txt  # or: pip install gradio matplotlib soundfile scipy pillow
+MOCK=1 python app.py
+```
+
+Weights are not stored in this repository. To load a trained head, place `head.pt` and the run’s `config.json`, `t_entropy.json`, and `thresholds.json` in `space/run/`, or extract them with `python space/scripts/load_run.py --run-zip <results.zip> --run-name m1v3`.
+
+
 ## How it works
 
 - **Backbone:** [nirnaya-flash-1.0](https://huggingface.co/Darkrider/nirnaya-flash-1.0) (Gemma 4 E4B, reads audio natively), **frozen**. The clip and a fixed text request (one state + four questions, each option written out) go in once; the final hidden states come out.
