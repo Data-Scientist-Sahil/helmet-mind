@@ -60,7 +60,7 @@ Useful environment variables: `RUN_DIR`, `RUN_ZIP`, `RUN_NAME` (default `m1v3`),
 
 On a Hugging Face Space, set the Space secret `HF_TOKEN` (a read token; the head repo is public) and the Space variable `HF_MODEL_REPO=sahildl/rider-voice-decisions-m1v3`. **ZeroGPU** is the intended hardware (Pro); on free CPU the Gemma 4 E4B backbone is likely too large to load in fp32. The first request after a cold start loads the backbone; later requests are much faster. Inference is wrapped with `@spaces.GPU` and also runs on CPU when no GPU is present.
 
-To try the console live for free, upload [`kaggle_live_demo.ipynb`](kaggle_live_demo.ipynb) to a Kaggle notebook. Set **Accelerator** to **GPU T4 x2**, turn **Internet** on, and attach a secret named `HF_TOKEN` (a sahildl **read** token for the private head repo). Use **Save Version → Save & Run All (Commit)**, then search the version **Logs** for `PUBLIC LIVE DEMO LINK` (the URL is reprinted every 5 minutes). The session auto-stops after 3 hours (`DEMO_MAX_HOURS`). Cancel earlier if you are done, so you don’t burn GPU quota.
+To try the console live for free, upload [`kaggle_live_demo.ipynb`](kaggle_live_demo.ipynb) to a Kaggle notebook. Set **Accelerator** to **GPU T4 x2**, turn **Internet** on, and attach a secret named `HF_TOKEN` (any Hugging Face **read** token; the head repo is public). Use **Save Version → Save & Run All (Commit)**, then search the version **Logs** for `PUBLIC LIVE DEMO LINK` (the URL is reprinted every 5 minutes). The session auto-stops after 3 hours (`DEMO_MAX_HOURS`). Cancel earlier if you are done, so you don’t burn GPU quota.
 
 Rebuild the evaluation curve from a predictions file (never invents metrics):
 
