@@ -11,3 +11,4 @@ scipy
 numpy
 torchvision
 matplotlib
+edge-tts  # optional spoken reply; app falls back to text if missing or offline

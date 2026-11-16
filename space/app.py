@@ -38,6 +38,7 @@ ROOT = HERE if (HERE / "src").exists() else HERE.parent
 sys.path[:0] = [str(ROOT)]
 
 from src.alert_rules import DEFAULTS, card, consistent  # noqa: E402
+from src.rider_copy import rider_view  # noqa: E402
 
 # --------------------------------------------------------------------------- config
 def _truthy(v: str | None) -> bool:
@@ -212,6 +213,78 @@ def confidence_html(answers: dict | None, kind: str | None = None) -> str:
             f'<div class="conf-num">{p:.2f}</div></div>'
         )
     return '<div class="conf-block"><div class="conf-head">Confidence</div>' + "".join(rows) + "</div>"
+
+
+LANG_TAG = {"hinglish": "HINGLISH", "hindi": "हिंदी", "english": "ENGLISH"}
+
+
+def phone_html(view: dict | None) -> str:
+    """The rider's phone after the model decides (illustrative; nothing is called or sent)."""
+    if not view:
+        body = (
+            '<div class="ph-idle"><div class="ph-idle-dot"></div>'
+            '<div class="ph-idle-t">Listening for a voice note…</div>'
+            '<div class="ph-idle-s">Rider speaks once · the app answers here</div></div>'
+        )
+        cls, ops = "ph--idle", "Nothing sent yet"
+    else:
+        cls = {"sos": "ph--sos", "checkin": "ph--checkin"}.get(view["kind"], "ph--ok")
+        btns = "".join(
+            f'<div class="ph-btn{" ph-btn--primary" if i == 0 else ""}">{_esc(b)}</div>'
+            for i, b in enumerate(view["buttons"])
+        )
+        then = f'<div class="ph-then">Then: {_esc(view["then"])}</div>' if view.get("then") else ""
+        body = (
+            f'<div class="ph-lang">{_esc(LANG_TAG.get(view["lang"], view["lang"]))}</div>'
+            f'<div class="ph-line">{_esc(view["line"])}</div>'
+            f'<div class="ph-gloss">{_esc(view["gloss"])}</div>'
+            f'<div class="ph-say"><span class="ph-spk">🔊</span>“{_esc(view["spoken"])}”</div>'
+            f'{then}<div class="ph-btns">{btns}</div>'
+            f'<div class="ph-status">{_esc(view["status"])}</div>'
+        )
+        ops = view["ops"]
+    return (
+        '<div class="rider-wrap"><div class="rider-head"><span>RIDER SEES</span>'
+        '<span class="rider-note">Illustrative rider experience · simulated, nothing is called or sent</span></div>'
+        f'<div class="phone {cls}"><div class="ph-notch"></div><div class="ph-screen">{body}</div></div>'
+        f'<div class="ops-line"><span class="ops-k">SENT TO OPS / CUSTOMER</span>{_esc(ops)}</div></div>'
+    )
+
+
+def _view_for(answers: dict, c: dict) -> dict:
+    sit = LABELS["situation"].get(answers["situation"]["choice"], answers["situation"]["choice"])
+    return rider_view(c, answers, sit.lower())
+
+
+TTS_VOICE = {"english": "en-IN-NeerjaNeural", "hindi": "hi-IN-SwaraNeural", "hinglish": "hi-IN-SwaraNeural"}
+TTS_DIR = Path(os.environ.get("TTS_CACHE", "/tmp/rider-tts"))
+
+
+def speak(view: dict | None, muted: bool) -> str | None:
+    """Spoken reply via edge-tts (needs internet). Returns None when muted, missing or offline."""
+    if muted or not view or _truthy(os.environ.get("NO_TTS")):
+        return None
+    import hashlib
+
+    voice = TTS_VOICE.get(view["lang"], "en-IN-NeerjaNeural")
+    out = TTS_DIR / (hashlib.sha1(f"{voice}|{view['spoken']}".encode()).hexdigest()[:16] + ".mp3")
+    if out.exists():
+        return str(out)
+    try:
+        import asyncio
+
+        import edge_tts
+
+        TTS_DIR.mkdir(parents=True, exist_ok=True)
+
+        async def _go():
+            await asyncio.wait_for(edge_tts.Communicate(view["spoken"], voice).save(str(out)), 8)
+
+        asyncio.run(_go())
+        return str(out) if out.exists() and out.stat().st_size > 0 else None
+    except Exception as exc:
+        print(f"[rider-voice] tts skipped ({type(exc).__name__})", flush=True)
+        return None
 
 
 def counter_html(n: int) -> str:
@@ -535,6 +608,8 @@ def predict(audio_path, checkins, muted, sos_tau, last_out):
             int(checkins or 0),
             None,
             last_out,
+            phone_html(None),
+            None,
         )
     t0 = time.perf_counter()
     out = _infer(audio_path, th)
@@ -548,6 +623,7 @@ def predict(audio_path, checkins, muted, sos_tau, last_out):
     new_checkins = int(checkins or 0)
     if kind == "checkin":
         new_checkins += 1
+    view = _view_for(out["answers"], out["card"])
     packed = json.dumps(
         {"answers": out["answers"], "card": out["card"], "latency_s": latency_s, "path": audio_path},
         ensure_ascii=False,
@@ -562,6 +638,8 @@ def predict(audio_path, checkins, muted, sos_tau, last_out):
         new_checkins,
         _sound_for(kind, bool(muted)),
         packed,
+        phone_html(view),
+        speak(view, bool(muted)),
     )
 
 
@@ -570,7 +648,7 @@ def retune(sos_tau, last_out, checkins):
     th = merge_thresholds(sos_tau)
     metrics = curve_html(float(sos_tau)) + _mode_note()
     if not last_out:
-        return banner_html("idle", None), chips_html(None), confidence_html(None), metrics, counter_html(int(checkins or 0))
+        return banner_html("idle", None), chips_html(None), confidence_html(None), metrics, counter_html(int(checkins or 0)), phone_html(None)
     packed = json.loads(last_out)
     answers, rep = consistent(packed["answers"], th)
     c = card(answers, th)
@@ -582,6 +660,7 @@ def retune(sos_tau, last_out, checkins):
         confidence_html(answers, kind),
         metrics,
         counter_html(int(checkins or 0)),
+        phone_html(_view_for(answers, c)),
     )
 
 
@@ -593,7 +672,7 @@ def toggle_demo(playing: bool):
 
 def on_timer(idx, checkins, muted, sos_tau, last_out, playing):
     if not playing or not PRESET_PATHS:
-        return (int(idx or 0),) + (gr.update(),) * 10
+        return (int(idx or 0),) + (gr.update(),) * 12
     n = len(PRESET_PATHS)
     idx = int(idx or 0) % n
     path = str(PRESET_PATHS[idx][1])
@@ -651,7 +730,7 @@ with gr.Blocks(title="Rider Voice Decisions", fill_height=True, fill_width=True,
     banner = gr.HTML(banner_html("idle", None), elem_id="alert-banner")
 
     with gr.Row(elem_id="main-row", equal_height=True):
-        with gr.Column(scale=5, elem_id="left-col"):
+        with gr.Column(scale=4, elem_id="left-col"):
             audio = gr.Audio(
                 sources=["microphone", "upload"],
                 type="filepath",
@@ -663,16 +742,6 @@ with gr.Blocks(title="Rider Voice Decisions", fill_height=True, fill_width=True,
                     show_recording_waveform=True,
                 ),
             )
-            spec = gr.Image(
-                value=_blank_spec(),
-                label="SPECTROGRAM",
-                elem_id="spectrogram",
-                show_label=True,
-                interactive=False,
-                type="pil",
-                format="png",
-                buttons=[],
-            )
             with gr.Column(elem_id="presets-wrap"):
                 gr.Markdown("PRESETS", elem_id="presets-label")
                 with gr.Row(elem_id="preset-grid"):
@@ -683,13 +752,16 @@ with gr.Blocks(title="Rider Voice Decisions", fill_height=True, fill_width=True,
                         )
             with gr.Row(elem_id="controls-row"):
                 demo_btn = gr.Button("Autoplay demo", elem_id="demo-toggle", size="sm")
-                mute = gr.Checkbox(label="Mute alerts", value=True, elem_id="mute-toggle")
+                mute = gr.Checkbox(label="Mute sound", value=True, elem_id="mute-toggle")
                 count_html = gr.HTML(counter_html(0), elem_id="checkin-counter")
             sound = gr.Audio(label="alert", autoplay=True, visible=False, elem_id="hidden-sound")
 
-        with gr.Column(scale=6, elem_id="right-col"):
+        with gr.Column(scale=5, elem_id="phone-col"):
+            phone = gr.HTML(phone_html(None), elem_id="rider-phone")
+            voice = gr.Audio(label="spoken reply", autoplay=True, visible=False, elem_id="hidden-voice")
+
+        with gr.Column(scale=4, elem_id="right-col"):
             chips = gr.HTML(chips_html(None), elem_id="chips")
-            conf = gr.HTML(confidence_html(None), elem_id="confidence")
             slider = gr.Slider(
                 minimum=0.01,
                 maximum=0.99,
@@ -700,6 +772,19 @@ with gr.Blocks(title="Rider Voice Decisions", fill_height=True, fill_width=True,
                 elem_id="sos-slider",
             )
             metrics = gr.HTML(curve_html(DEFAULT_SOS) + _mode_note(), elem_id="curve-panel")
+            with gr.Column(elem_id="internals"):
+                gr.Markdown("MODEL INTERNALS", elem_id="internals-label")
+                conf = gr.HTML(confidence_html(None), elem_id="confidence")
+                spec = gr.Image(
+                    value=_blank_spec(),
+                    label="SPECTROGRAM",
+                    elem_id="spectrogram",
+                    show_label=True,
+                    interactive=False,
+                    type="pil",
+                    format="png",
+                    buttons=[],
+                )
 
     gr.HTML(
         '<div class="site-footer">Inspired by delivery apps · Not affiliated with Zomato or Swiggy · '
@@ -708,7 +793,7 @@ with gr.Blocks(title="Rider Voice Decisions", fill_height=True, fill_width=True,
     )
 
     predict_inputs = [audio, checkins, mute, slider, last_out]
-    predict_outputs = [banner, spec, chips, conf, metrics, count_html, checkins, sound, last_out]
+    predict_outputs = [banner, spec, chips, conf, metrics, count_html, checkins, sound, last_out, phone, voice]
 
     audio.stop_recording(predict, predict_inputs, predict_outputs)
     audio.upload(predict, predict_inputs, predict_outputs)
@@ -720,7 +805,7 @@ with gr.Blocks(title="Rider Voice Decisions", fill_height=True, fill_width=True,
             outputs=[audio, *predict_outputs],
         )
 
-    slider.release(retune, [slider, last_out, checkins], [banner, chips, conf, metrics, count_html])
+    slider.release(retune, [slider, last_out, checkins], [banner, chips, conf, metrics, count_html, phone])
     slider.change(lambda t: curve_html(float(t)) + _mode_note(), slider, metrics)
 
     demo_btn.click(toggle_demo, playing, [playing, timer, demo_btn])
