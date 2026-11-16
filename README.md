@@ -30,7 +30,7 @@ Held-out **synthetic test set**, round-3 (m1v3, spec 0.4.0): 37 scripts / 740 cl
 
 On the earlier **round-2** test set: action 75.0, false SOS 0.7%. Shipped thresholds: `sos_tau` 0.42, `checkin_tau` 0.04, `safety_tau` 0.02.
 
-The trained head lives in the private Hub repo [`sahildl/rider-voice-decisions-m1v3`](https://huggingface.co/sahildl/rider-voice-decisions-m1v3) (`head.safetensors` and `head.pt`). The model card keeps out-of-fold threshold-fit rates separate from these test figures, and has the per-class, SNR and language breakdowns.
+The trained head lives in the Hub repo [`sahildl/rider-voice-decisions-m1v3`](https://huggingface.co/sahildl/rider-voice-decisions-m1v3) (`head.safetensors` and `head.pt`). The model card keeps out-of-fold threshold-fit rates separate from these test figures, and has the per-class, SNR and language breakdowns.
 
 The model **suggests**; a person confirms. It is not a production safety system.
 
@@ -60,7 +60,7 @@ A hosted Hugging Face Space is intended at [sahildl/rider-voice-decisions](https
 Until then, you can host the same console on Kaggle and read a public live link from the logs:
 
 1. Import [`space/kaggle_live_demo.ipynb`](space/kaggle_live_demo.ipynb) (File → Import Notebook).
-2. Set **Accelerator** to **GPU T4 x2**, turn **Internet** on, and attach a Kaggle secret named `HF_TOKEN` (a **read** token for the sahildl account that can access the private head repo).
+2. Set **Accelerator** to **GPU T4 x2**, turn **Internet** on, and attach a Kaggle secret named `HF_TOKEN` (any Hugging Face **read** token; the head repo is public).
 3. Click **Save Version → Save & Run All (Commit)** and close the tab. A committed run does not depend on the editor staying open.
 4. After the model has downloaded and loaded (around 10 minutes), open that version’s **Logs** and search for `PUBLIC LIVE DEMO LINK`. The URL is reprinted every 5 minutes, so it stays near the bottom of the log.
 
@@ -74,10 +74,10 @@ pip install -r requirements.txt  # or: pip install gradio matplotlib soundfile s
 MOCK=1 python app.py
 ```
 
-Weights are not stored in this repository. They live in the private Hub repo [`sahildl/rider-voice-decisions-m1v3`](https://huggingface.co/sahildl/rider-voice-decisions-m1v3) (`head.safetensors` plus the original `head.pt` that the demo engine loads). To load them:
+Weights are not stored in this repository. They live in the Hub repo [`sahildl/rider-voice-decisions-m1v3`](https://huggingface.co/sahildl/rider-voice-decisions-m1v3) (`head.safetensors` plus the original `head.pt` that the demo engine loads). To load them:
 
 ```bash
-# download at startup (needs a token if the model repo is private)
+# download at startup
 HF_MODEL_REPO=sahildl/rider-voice-decisions-m1v3 python app.py
 
 # or extract a local results zip
