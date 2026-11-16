@@ -60,6 +60,8 @@ Useful environment variables: `RUN_DIR`, `RUN_ZIP`, `RUN_NAME` (default `m1v3`),
 
 On a Hugging Face Space, set the Space secret `HF_TOKEN` (a read token that can reach the private head repo) and the Space variable `HF_MODEL_REPO=sahildl/rider-voice-decisions-m1v3`. **ZeroGPU** is the intended hardware (Pro); on free CPU the Gemma 4 E4B backbone is likely too large to load in fp32. The first request after a cold start loads the backbone; later requests are much faster. Inference is wrapped with `@spaces.GPU` and also runs on CPU when no GPU is present.
 
+To try the console live for free, upload [`kaggle_live_demo.ipynb`](kaggle_live_demo.ipynb) to a Kaggle notebook: **Accelerator = GPU T4**, **Internet on**, and a secret named `HF_TOKEN` (a sahildl **read** token). Run All, keep the last cell running, and open the public `*.gradio.live` link it prints. Stop the session when you are done.
+
 Rebuild the evaluation curve from a predictions file (never invents metrics):
 
 ```bash

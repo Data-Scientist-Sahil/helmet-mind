@@ -20,6 +20,8 @@ A Gradio dispatch console lives in [`space/`](space/). Record or upload a short 
 
 A hosted Hugging Face Space is intended at [sahildl/rider-voice-decisions](https://huggingface.co/spaces/sahildl/rider-voice-decisions). It is **not up yet**: hosting a Gradio Space on `cpu-basic` now requires a Hugging Face Pro subscription, which this account does not have.
 
+Until then, you can host the same console on a free Kaggle T4 and get a public Gradio link. Upload [`space/kaggle_live_demo.ipynb`](space/kaggle_live_demo.ipynb), set **Accelerator** to **GPU T4**, turn **Internet** on, and add a Kaggle secret named `HF_TOKEN` (a **read** token for the sahildl account that can access the private head repo). Run All and keep the last cell running. The link lasts for the session; Gradio share links also expire after about 72 hours. Stop the session when you are done so you don't burn the free GPU quota.
+
 To run the console locally without trained weights:
 
 ```bash
@@ -97,14 +99,15 @@ Metrics: accuracy and macro-F1 per question, safety recall and false-alarm rate 
 
 ## Run it on Kaggle (free T4s)
 
-Two push-button notebooks in `notebooks/` (they are separate because the TTS library pins an older `transformers`):
+Two push-button notebooks in `notebooks/` (they are separate because the TTS library pins an older `transformers`), plus a live-demo notebook in `space/`:
 
 1. **`01_kaggle_audio.ipynb`** — GPU T4, Internet on, secret `HF_TOKEN` (accept the Indic Parler-TTS terms on the Hub
    once). Scripts → TTS → noise and phone chain → `rv-audio/` (clips + manifest). ~1 h for the 130-script wedge.
 2. **`02_kaggle_train.ipynb`** — GPU **T4 x2**, Internet on, with notebook 01's output attached. Backbone parity check →
    features (one forward per clip) → zero-shot baseline → train the head → calibrate → evaluate → latency.
+3. **`space/kaggle_live_demo.ipynb`** — GPU T4, Internet on, secret `HF_TOKEN` (sahildl read token). Hosts the dispatch-console Gradio app with a public share link. Self-contained; you do not need to attach this repo as a dataset. Keep the last cell running, and stop the session when you are done.
 
-Attach this repo folder as a Kaggle dataset (or set `REPO_URL`). Every stage is resumable: if a session stops, re-run.
+For the training notebooks, attach this repo folder as a Kaggle dataset (or set `REPO_URL`). Every stage is resumable: if a session stops, re-run.
 
 ## Run it locally
 
