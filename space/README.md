@@ -50,9 +50,15 @@ python scripts/load_run.py --run-zip results/round3_training_results.zip --run-n
 python app.py
 ```
 
-Useful environment variables: `RUN_DIR`, `RUN_ZIP`, `RUN_NAME` (default `m1v3`), `THRESHOLDS`, `MODEL_ID` / `MODEL_DIR` (default `Darkrider/nirnaya-flash-1.0`), `PRECISION` (`fp16` on GPU, `fp32` on CPU), `MOCK=1`.
+Or download the published head at startup from a Hub model repo (private repos need `HF_TOKEN`):
 
-On a Hugging Face Space, pick **ZeroGPU** hardware. The first request after a cold start loads the backbone; later requests are much faster. Inference is wrapped with `@spaces.GPU` and also runs on CPU when no GPU is present.
+```bash
+HF_MODEL_REPO=sahildl/rider-voice-decisions-m1v3 python app.py
+```
+
+Useful environment variables: `RUN_DIR`, `RUN_ZIP`, `RUN_NAME` (default `m1v3`), `HF_MODEL_REPO`, `HF_TOKEN`, `THRESHOLDS`, `MODEL_ID` / `MODEL_DIR` (default `Darkrider/nirnaya-flash-1.0`), `PRECISION` (`fp16` on GPU, `fp32` on CPU), `MOCK=1`.
+
+On a Hugging Face Space, set the Space secret `HF_TOKEN` (a read token that can reach the private head repo) and the Space variable `HF_MODEL_REPO=sahildl/rider-voice-decisions-m1v3`. **ZeroGPU** is the intended hardware (Pro); on free CPU the Gemma 4 E4B backbone is likely too large to load in fp32. The first request after a cold start loads the backbone; later requests are much faster. Inference is wrapped with `@spaces.GPU` and also runs on CPU when no GPU is present.
 
 Rebuild the evaluation curve from a predictions file (never invents metrics):
 

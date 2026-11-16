@@ -8,6 +8,8 @@ Environment:
   RUN_DIR                trained head folder (default ./run): head.pt, config.json, t_entropy.json, thresholds.json
   RUN_ZIP                results zip containing out/runs/<RUN_NAME>/...; extracted into RUN_DIR on start
   RUN_NAME               run name inside the zip (default m1v3)
+  HF_MODEL_REPO          Hub model repo to snapshot into RUN_DIR at startup (e.g. sahildl/rider-voice-decisions-m1v3)
+  HF_TOKEN               read token for a private HF_MODEL_REPO (Space secret); never logged
   THRESHOLDS             optional thresholds json merged over the run's (default ./thresholds.json)
   MODEL_ID / MODEL_DIR   backbone (default Darkrider/nirnaya-flash-1.0)
   PRECISION              fp16 (default on CUDA) | bf16 | fp32 (CPU)
@@ -351,7 +353,8 @@ def _want_mock() -> bool:
         return True
     run = Path(os.environ.get("RUN_DIR", ROOT / "run"))
     zip_path = os.environ.get("RUN_ZIP")
-    return not (run / "head.pt").exists() and not zip_path
+    repo = (os.environ.get("HF_MODEL_REPO") or "").strip()
+    return not (run / "head.pt").exists() and not zip_path and not repo
 
 
 MOCK = _want_mock()
@@ -375,12 +378,41 @@ def _extract_run_zip(zip_path: Path, run_name: str, dst: Path) -> None:
                     shutil.copyfileobj(r, w)
 
 
+def _download_hf_model_repo(dst: Path) -> None:
+    """Snapshot the trained head from HF_MODEL_REPO into RUN_DIR. Uses HF_TOKEN if set; never logs it."""
+    repo = (os.environ.get("HF_MODEL_REPO") or "").strip()
+    if not repo:
+        return
+    if (dst / "head.pt").exists() and (dst / "config.json").exists():
+        return
+    from huggingface_hub import snapshot_download
+
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    dst.mkdir(parents=True, exist_ok=True)
+    print(f"[rider-voice] downloading run files from {repo} -> {dst}", flush=True)
+    snapshot_download(
+        repo_id=repo,
+        repo_type="model",
+        local_dir=str(dst),
+        token=token,
+        allow_patterns=[
+            "head.pt",
+            "config.json",
+            "t_entropy.json",
+            "thresholds.json",
+            "calibration.json",
+        ],
+    )
+
+
 def _resolve_run_dir() -> Path:
     dst = Path(os.environ.get("RUN_DIR", ROOT / "run"))
     z = os.environ.get("RUN_ZIP")
     name = os.environ.get("RUN_NAME", "m1v3")
     if z and not (dst / "head.pt").exists():
         _extract_run_zip(Path(z), name, dst)
+    if not (dst / "head.pt").exists():
+        _download_hf_model_repo(dst)
     return dst
 
 

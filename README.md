@@ -18,7 +18,7 @@ A concept for Indian last-mile delivery, built on synthetic data. **Not affiliat
 
 A Gradio dispatch console lives in [`space/`](space/). Record or upload a short rider voice note — or click a preset — and the model returns the situation, next action, language, and a two-level safety alert (SOS, or an “Are you safe?” check-in).
 
-**Try it live:** _[Hugging Face Space — link to be added]_
+A hosted Hugging Face Space is intended at [sahildl/rider-voice-decisions](https://huggingface.co/spaces/sahildl/rider-voice-decisions). It is **not up yet**: hosting a Gradio Space on `cpu-basic` now requires a Hugging Face Pro subscription, which this account does not have.
 
 To run the console locally without trained weights:
 
@@ -28,7 +28,18 @@ pip install -r requirements.txt  # or: pip install gradio matplotlib soundfile s
 MOCK=1 python app.py
 ```
 
-Weights are not stored in this repository. To load a trained head, place `head.pt` and the run’s `config.json`, `t_entropy.json`, and `thresholds.json` in `space/run/`, or extract them with `python space/scripts/load_run.py --run-zip <results.zip> --run-name m1v3`.
+Weights are not stored in this repository. They live in the private Hub repo [`sahildl/rider-voice-decisions-m1v3`](https://huggingface.co/sahildl/rider-voice-decisions-m1v3). To load them:
+
+```bash
+# download at startup (needs a token if the model repo is private)
+HF_MODEL_REPO=sahildl/rider-voice-decisions-m1v3 python app.py
+
+# or extract a local results zip
+python space/scripts/load_run.py --run-zip <results.zip> --run-name m1v3
+python app.py
+```
+
+You can also place `head.pt`, `config.json`, `t_entropy.json`, and `thresholds.json` in `space/run/` by hand.
 
 
 ## How it works
